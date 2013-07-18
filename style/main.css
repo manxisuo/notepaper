@@ -7,20 +7,12 @@ html {
     cursor: move;
 }
 .note {
-    background-color: rgba(255, 250, 0, 1);
     border: 0px solid white;
     
     width: 300px;
     max-height: 500px;
     
     position: absolute !important;
-
-    webkit-moz-border-radius: 5px;
-    moz-border-radius: 5px;
-    border-radius: 5px;
-    -webkit-box-shadow: 5px 5px 20px #A8ABAB;
-    -moz-box-shadow: 5px 5px 20px #A8ABAB;
-    box-shadow: 5px 5px 20px #A8ABAB;
 }
 .note-head {
     padding: 2px;
@@ -37,7 +29,13 @@ html {
     word-break: normal; 
     overflow-y: auto;
     padding: 0 10px;   
-
+    background-color: rgba(255, 250, 0, 1);
+    webkit-moz-border-radius: 0 0 5px 5px;
+    moz-border-radius: 0 0 5px 5px;
+    border-radius: 0 0 5px 5px;
+    -webkit-box-shadow: 5px 5px 20px #A8ABAB;
+    -moz-box-shadow: 5px 5px 20px #A8ABAB;
+    box-shadow: 5px 5px 20px #A8ABAB;
 }
 .note-title {
     display: inline-block;
