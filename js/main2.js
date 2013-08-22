@@ -1,10 +1,26 @@
 
 var stamp;
-var default_entity = {}
 
 $(function() {
     loadNotes();
+    
+    addExportListener();
 });
+
+function addExportListener() {
+    $('#export').on('click', function() {
+        /*
+        if ($(this).text() == '备份数据') {
+            $(this).text('关闭')
+            exportNotes();
+        }
+        else {
+            $(this).text('备份数据');
+            $('#output').hide();
+        } */
+        exportNotes();
+    });
+}
 
 function bindActions(note) {
     
@@ -160,6 +176,25 @@ function loadNotes() {
     }
 }
 
+function exportNotes() {
+    var exports = [];
+    if (localStorage) {
+        var entity;
+        for (id in localStorage){
+            entity = readNote(id);
+            exports.push(entity);
+        }
+        if (exports.length > 0) {
+            var text = JSON.stringify(exports);
+            //$('#output').val(text).show();
+            var win = window.open('');
+            var doc = win.document;
+            doc.title = '导出数据';
+            doc.write(text);
+        }
+    }
+}
+
 function createBlankNote()
 {
     var entity = generateDefaultEntity();
@@ -212,4 +247,33 @@ function join(obj1, obj2)
     }
     
     return obj1;
+}
+
+function beautifyObject(obj) {
+    
+    var text = '';
+    var fun = function(obj) {
+        if (obj instanceof Array){
+            text += '[';
+            for (item in obj) {
+                text += fun(obj[item]);
+                text += ', ' 
+            }
+            text += ']';
+        }
+        else if (typeof obj == 'object') {
+            text += '{';
+            for (item in obj) {
+                text += fun(obj[item]);
+                text += ', ' 
+            }
+            text += '}'; 
+        }
+        else if (typeof obj == 'number' || typeof obj == 'string') {
+            text += obj;
+            console.log(text);
+        }
+    };
+    fun(obj);
+    return text;
 }
