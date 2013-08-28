@@ -34,25 +34,32 @@ html {
     webkit-moz-border-radius: 0 0 5px 5px;
     moz-border-radius: 0 0 5px 5px;
     border-radius: 0 0 5px 5px;
-    -webkit-box-shadow: 5px 5px 20px #A8ABAB;
-    -moz-box-shadow: 5px 5px 20px #A8ABAB;
-    box-shadow: 5px 5px 20px #A8ABAB;
+    -webkit-box-shadow: 2px 2px 10px #A8ABAB;
+    -moz-box-shadow: 2px 2px 10px #A8ABAB;
+    box-shadow: 2px 2px 10px #A8ABAB;
 }
 .note-title {
     display: inline-block;
     position: absolute;
     left: 0.5em;
 }
+.note-color {
+    display: inline-block;
+    position: absolute;
+    right: 5em;
+    cursor: pointer;
+}
+
 .note-add {
     display: inline-block;
     position: absolute;
-    right: 5.5em;
+    right: 3.5em;
     cursor: pointer;
 }
 .note-fold {
     display: inline-block;
     position: absolute;
-    right: 3em;
+    right: 2em;
     cursor: pointer;
 }
 .note-delete {
@@ -129,4 +136,43 @@ html {
     word-wrap: break-word;
     display: none;
     background-color: #EAEAEA;
+}
+
+.color-picker {
+    z-index: 200;
+    position: absolute;
+    display: none;
+    width: 120px;
+    padding: 5px;
+    background-color: white;
+}
+
+.color-block {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.pop-closer {
+    color: gray;
+    float: right;
+    cursor: pointer;
+}
+
+.pop-toolbar {
+    height: 15px;
+    padding-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+.round-corner {
+moz-border-radius: 5px;
+webkit-moz-border-radius: 5px;
+border-radius: 5px;
+-webkit-box-shadow: 0px 1px 3px #A8ABAB;
+-moz-box-shadow: 0px 1px 3px #A8ABAB;
+box-shadow: 0px 1px 3px #A8ABAB;
 }
