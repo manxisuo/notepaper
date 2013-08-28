@@ -1,10 +1,13 @@
 
 var stamp;
+var currentNote;
 
 $(function() {
     loadNotes();
     
     addExportListener();
+    
+    initColorPicker();
 });
 
 function addExportListener() {
@@ -54,6 +57,7 @@ function bindActions(note) {
     
     note.children('.note-head').on('mousedown', function() {
         var n = $(this).parent('.note'); 
+        currentNote = n;
         n.css('z-index', 100);
         updateNote({id: n.attr('id'), z: 100});
         $('.note').each(function() {
@@ -66,6 +70,7 @@ function bindActions(note) {
     
     note.children('.note-body').on('focus' ,function() {
         var n = $(this).parent('.note'); 
+        currentNote = n;
         n.css('z-index', 100);
         updateNote({id: n.attr('id'), z: 100});
         $('.note').each(function() {
@@ -100,6 +105,12 @@ function bindActions(note) {
         }
     });
 
+    // 修改背景色
+    note.find('.note-color').click(function(e) {
+        currentNote = $(this).parents('.note');
+        popColorPicker({left: e.clientX, top: e.clientY});
+    });
+
     // 新建便笺
     note.find('.note-add').click(function() {
         createBlankNote();
@@ -109,7 +120,7 @@ function bindActions(note) {
     note.find('.note-fold').click(function() {
         var body = note.children('.note-body');
         body.slideToggle();
-        $(this).text($(this).text() == '折叠' ? '展开' : '折叠');
+        $(this).text($(this).text() == '折' ? '展' : '折');
     });
     
     // 删除便笺
@@ -130,10 +141,12 @@ function createNote(entity) {
     var note = $('<div class="note">').attr('id', id);
     var head = $('<div class="note-head note-draggable orange">');
     var body = $('<div contenteditable="true" class="note-body">').html(content || '');
+    body.css({'background-color': entity.bgColor});
     head.append($('<span class="note-title" title="双击修改标题">').text(title || '便笺' + id));
-    head.append($('<span class="note-add not-draggable">').text('新建'));
-    head.append($('<span class="note-fold not-draggable">').text('折叠'));
-    head.append($('<span class="note-delete not-draggable">').text('关闭'));
+    head.append($('<span class="note-color not-draggable">').text('色'));
+    head.append($('<span class="note-add not-draggable">').text('增'));
+    head.append($('<span class="note-fold not-draggable">').text('折'));
+    head.append($('<span class="note-delete not-draggable">').text('删'));
     note.append(head).append(body);
     bindActions(note);
     
@@ -195,11 +208,53 @@ function exportNotes() {
     }
 }
 
-function createBlankNote()
-{
+function createBlankNote() {
     var entity = generateDefaultEntity();
     createNote(entity);
     saveNote(entity);
+}
+
+function popColorPicker(position) {
+    console.log(position);
+    var picker = $('.color-picker');
+    picker.show();
+    picker.offset(position);
+    
+    console.log(picker.offset());
+    
+}
+
+function initColorPicker() {
+    var picker = $('.color-picker');
+    var toolbar = $('<div class="pop-toolbar" />')
+        .appendTo(picker);
+    var closer = $('<span class="pop-closer" />').text('关闭');
+    closer.click(function() {
+        $('.color-picker').hide();
+    }).appendTo(toolbar);
+    
+    var colors =[
+        '#FFFA00',
+        '#E9E9E9', '#FFCF88', '#B9B434', '#A0BB36', 
+        '#B3E765', '#79C77F', '#8FB99E', '#499989', 
+        '#6F84A8', '#6F84A8', '#A896D6', '#C699F0',
+        '#BB8EC4'];
+    
+    for (i in colors) {
+        var block = $('<div class="color-block" />')
+            .css('background-color', colors[i]);
+            
+       (function(block){
+            block.click(function() {
+                var bgColor = block.css('background-color');
+                currentNote.children('.note-body')
+                    .css('background-color', bgColor);
+                updateNote({'id': currentNote.attr('id'), 'bgColor': bgColor});
+            });   
+        })(block);
+            
+        picker.append(block);
+    }    
 }
 
 function generateDefaultEntity() {
@@ -214,7 +269,8 @@ function generateDefaultEntity() {
         'height': 120,
         'left': 8,
         'top': 8,
-        'z': 1
+        'z': 1,
+        'bgColor': '#FFFA00'
     };
     
     return default_entity;
