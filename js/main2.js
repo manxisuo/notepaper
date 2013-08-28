@@ -234,7 +234,8 @@ function initColorPicker() {
     }).appendTo(toolbar);
     
     var colors =[
-        '#FFFA00',
+        '#f56545', '#ffbb22', '#eeee22', '#bbe535', 
+        '#77ddbb', '#66ccdd', '#b5c5c5',
         '#E9E9E9', '#FFCF88', '#B9B434', '#A0BB36', 
         '#B3E765', '#79C77F', '#8FB99E', '#499989', 
         '#6F84A8', '#6F84A8', '#A896D6', '#C699F0',
@@ -270,7 +271,7 @@ function generateDefaultEntity() {
         'left': 8,
         'top': 8,
         'z': 1,
-        'bgColor': '#FFFA00'
+        'bgColor': '#ffbb22'
     };
     
     return default_entity;
