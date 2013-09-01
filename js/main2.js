@@ -1,32 +1,44 @@
-
 var stamp;
 var currentNote;
+var properties = ["id", "title", "content", "width", "height", "left", "top", "z", "bgColor"];
+var ID_ORIGIN;
+var Z_1 = 1;
+var Z_2 = 100;
+var Z_3 = 200;
 
 $(function() {
+    initIdOrigin();
+    
     loadNotes();
     
     addExportListener();
+    
+    addUpgradeListener();
     
     initColorPicker();
 });
 
 function addExportListener() {
     $('#export').on('click', function() {
-        /*
-        if ($(this).text() == '备份数据') {
-            $(this).text('关闭')
-            exportNotes();
-        }
-        else {
-            $(this).text('备份数据');
-            $('#output').hide();
-        } */
         exportNotes();
     });
 }
 
+function addUpgradeListener() {
+    $('#upgrade').on('click', function() {
+        var entities = readAllNotes();
+        var entity;
+        var defaultEntity = generateDefaultEntity();
+        for (i in entities) {
+            defaultEntity.id = entities[i].id;
+            entity = join(defaultEntity, entities[i]);
+            saveNote(entity);
+        }
+        location.reload();
+    });
+}
+
 function bindActions(note) {
-    
     // 可改变位置
     note.draggable({
         cancel: '.not-draggable',
@@ -58,11 +70,11 @@ function bindActions(note) {
     note.children('.note-head').on('mousedown', function() {
         var n = $(this).parent('.note'); 
         currentNote = n;
-        n.css('z-index', 100);
+        n.css('z-index', Z_2);
         updateNote({id: n.attr('id'), z: 100});
         $('.note').each(function() {
             if (n.attr('id') != $(this).attr('id')) {
-                $(this).css('z-index', 1);
+                $(this).css('z-index', Z_1);
                 updateNote({id: $(this).attr('id'), z: 1});
             }
         });
@@ -71,11 +83,11 @@ function bindActions(note) {
     note.children('.note-body').on('focus' ,function() {
         var n = $(this).parent('.note'); 
         currentNote = n;
-        n.css('z-index', 100);
+        n.css('z-index', Z_2);
         updateNote({id: n.attr('id'), z: 100});
         $('.note').each(function() {
             if (n.attr('id') != $(this).attr('id')) {
-                $(this).css('z-index', 1);
+                $(this).css('z-index', Z_1);
                 updateNote({id: $(this).attr('id'), z: 1});
             }
         });
@@ -97,10 +109,10 @@ function bindActions(note) {
 
     // 修改便笺标题
     note.find('.note-title').dblclick(function() {
-        var title = window.prompt('请输入新标题, 最多10个字符', $(this).text());
+        var title = window.prompt('请输入新标题', $(this).text());
         if (title) {
             var id = $(this).parents('.note').attr('id');
-            $(this).text(title.substr(0, 10));
+            $(this).text(title);
             updateNote({'id': id, 'title': title});
         }
     });
@@ -118,9 +130,19 @@ function bindActions(note) {
 
     // 折叠便笺
     note.find('.note-fold').click(function() {
+        var id = $(this).parents('.note').attr('id');
         var body = note.children('.note-body');
         body.slideToggle();
-        $(this).text($(this).text() == '折' ? '展' : '折');
+        var entity = {id: id};
+        if ($(this).text() == '折') {
+            $(this).text('展');
+            entity.folded = true;
+        }
+        else {
+            $(this).text('折');
+            entity.folded = false;
+        }
+        updateNote(entity);
     });
     
     // 删除便笺
@@ -133,7 +155,8 @@ function bindActions(note) {
     });
 }
 
-function createNote(entity) {
+// 显示
+function showNote(entity) {
     var id = entity.id;
     var title = entity.title;
     var content = entity.content;
@@ -142,11 +165,21 @@ function createNote(entity) {
     var head = $('<div class="note-head note-draggable orange">');
     var body = $('<div contenteditable="true" class="note-body">').html(content || '');
     body.css({'background-color': entity.bgColor});
-    head.append($('<span class="note-title" title="双击修改标题">').text(title || '便笺' + id));
-    head.append($('<span class="note-color not-draggable">').text('色'));
-    head.append($('<span class="note-add not-draggable">').text('增'));
-    head.append($('<span class="note-fold not-draggable">').text('折'));
+    head.append($('<span class="note-title" title="双击修改标题">').text(title || '便笺' + id));  
     head.append($('<span class="note-delete not-draggable">').text('删'));
+    head.append($('<span class="note-color not-draggable">').text('色'));
+    var foldLabel;
+    if (entity.folded) {
+        body.hide();
+        foldLabel = '展';
+    }
+    else {
+        foldLabel = '折';
+    }
+    head.append($('<span class="note-fold not-draggable">').text(foldLabel));
+    head.append($('<span class="note-add not-draggable">').text('增'));
+
+    
     note.append(head).append(body);
     bindActions(note);
     
@@ -159,32 +192,55 @@ function createNote(entity) {
     note.appendTo($('body')).show();
 }
 
+// 改(合并)
 function updateNote(entity) {
     var entity_0 = readNote(entity.id);
     saveNote(join(entity_0, entity));
 }
 
+// 增|改(覆盖)
 function saveNote(entity) {   
     localStorage[entity.id] = JSON.stringify(entity);
 }
 
+// 读
 function readNote(id) {
-    var entity = JSON.parse(localStorage[id]);
-    return entity;
+    try {
+        var entity = JSON.parse(localStorage[id]);
+        if (null != entity.id) return entity;
+        else return null;
+    }
+    catch(e) {
+        return null;
+    }
 }
 
+// 读(所有)
+function readAllNotes() {
+    var entities = [];
+    for (id in localStorage) {
+        var entity = readNote(id);
+        if (null != entity) {
+            entities.push(entity);
+        }
+    }
+    return entities;
+}
+
+// 删：
 function deleteNote(id) {
     delete localStorage[id];
 }
 
+// 读(所有) && 显示
 function loadNotes() {
-    if (0 == localStorage.length) {
+    var entities = readAllNotes();
+    if (0 == entities.length) {
         createBlankNote();
     }
     else {
-        for (id in localStorage){
-            var entity = readNote(id);
-            createNote(entity);
+        for (i in entities) {
+            showNote(entities[i]);
         }     
     }
 }
@@ -210,18 +266,14 @@ function exportNotes() {
 
 function createBlankNote() {
     var entity = generateDefaultEntity();
-    createNote(entity);
+    showNote(entity);
     saveNote(entity);
 }
 
 function popColorPicker(position) {
-    console.log(position);
     var picker = $('.color-picker');
     picker.show();
-    picker.offset(position);
-    
-    console.log(picker.offset());
-    
+    picker.offset(position);    
 }
 
 function initColorPicker() {
@@ -258,6 +310,19 @@ function initColorPicker() {
     }    
 }
 
+function initIdOrigin() {
+    var count = readAllNotes().length;
+    var id_origin = localStorage['id_origin'];
+    if (0 == count || null == id_origin) {
+        ID_ORIGIN = new Date().getTime();
+        localStorage['id_origin'] = ID_ORIGIN;
+    }
+    else 
+    {
+        ID_ORIGIN = id_origin;
+    }
+}
+
 function generateDefaultEntity() {
     var id = generateId();
     var title = '便笺' + id;
@@ -269,8 +334,9 @@ function generateDefaultEntity() {
         'width': 300,
         'height': 120,
         'left': 8,
-        'top': 8,
-        'z': 1,
+        'top': 40,
+        'z': Z_3,
+        'folded': false,
         'bgColor': '#ffbb22'
     };
     
@@ -289,7 +355,7 @@ function max(a, b) {
 
 function generateId()
 {
-    return new Date().getTime();
+    return new Date().getTime() - ID_ORIGIN;
 }
 
 function join(obj1, obj2)
@@ -299,7 +365,8 @@ function join(obj1, obj2)
     }
     else {
         for (key in obj1) {
-            obj1[key] = obj2[key] || obj1[key];
+            if (0 === obj2[key] || false === obj2[key]) obj1[key] = obj2[key];
+            else obj1[key] = obj2[key] || obj1[key];
         }
     }
     
@@ -328,7 +395,6 @@ function beautifyObject(obj) {
         }
         else if (typeof obj == 'number' || typeof obj == 'string') {
             text += obj;
-            console.log(text);
         }
     };
     fun(obj);

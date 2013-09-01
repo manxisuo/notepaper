@@ -42,30 +42,34 @@ html {
     display: inline-block;
     position: absolute;
     left: 0.5em;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 65%;
 }
 .note-color {
     display: inline-block;
-    position: absolute;
-    right: 5em;
+    float: right;
+    padding-right: 5px;
     cursor: pointer;
 }
 
 .note-add {
     display: inline-block;
-    position: absolute;
-    right: 3.5em;
+    float: right;
+    padding-right: 5px;
     cursor: pointer;
 }
 .note-fold {
     display: inline-block;
-    position: absolute;
-    right: 2em;
+    float: right;
+    padding-right: 5px;
     cursor: pointer;
 }
 .note-delete {
     display: inline-block;
-    position: absolute;
-    right: 0.5em;
+    float: right;
+    padding-right: 5px;
     cursor: pointer;
 }
 
